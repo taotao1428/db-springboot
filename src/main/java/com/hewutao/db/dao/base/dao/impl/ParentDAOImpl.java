@@ -5,6 +5,7 @@ import com.hewutao.db.dao.base.mapper.ParentPOMapper;
 import com.hewutao.db.dao.base.model.ParentPO;
 import com.hewutao.db.dao.base.model.ParentPOExample;
 import com.hewutao.db.dao.base.support.DbStatus;
+import com.hewutao.db.dao.base.support.EntityType;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -21,14 +22,14 @@ public class ParentDAOImpl implements ParentDAO {
     public List<String> getEndpointIdsByInstanceId(String instanceId) {
         ParentPOExample example = new ParentPOExample();
         example.or().andParentIdEqualTo(instanceId)
-                .andParentTypeEqualTo("instance")
-                .andChildTypeEqualTo("endpoint")
+                .andParentTypeEqualTo(EntityType.INSTANCE)
+                .andChildTypeEqualTo(EntityType.ENDPOINT)
                 .andStatusEqualTo(DbStatus.NORMAL);
 
         List<ParentPO> parentPOS = parentPOMapper.selectByExample(example);
 
         return parentPOS.stream()
-                .map(p -> p.getId())
+                .map(p -> p.getChildId())
                 .collect(Collectors.toList());
     }
 
@@ -36,14 +37,14 @@ public class ParentDAOImpl implements ParentDAO {
     public List<String> getNodeIdsByInstanceId(String instanceId) {
         ParentPOExample example = new ParentPOExample();
         example.or().andParentIdEqualTo(instanceId)
-                .andParentTypeEqualTo("instance")
-                .andChildTypeEqualTo("node")
+                .andParentTypeEqualTo(EntityType.INSTANCE)
+                .andChildTypeEqualTo(EntityType.NODE)
                 .andStatusEqualTo(DbStatus.NORMAL);
 
         List<ParentPO> parentPOS = parentPOMapper.selectByExample(example);
 
         return parentPOS.stream()
-                .map(p -> p.getId())
+                .map(p -> p.getChildId())
                 .collect(Collectors.toList());
     }
 
@@ -52,9 +53,9 @@ public class ParentDAOImpl implements ParentDAO {
         ParentPOExample example = new ParentPOExample();
         example.or()
                 .andChildIdEqualTo(endpointId)
-                .andChildTypeEqualTo("endpoint")
+                .andChildTypeEqualTo(EntityType.ENDPOINT)
                 .andParentIdEqualTo(instanceId)
-                .andParentTypeEqualTo("instance");
+                .andParentTypeEqualTo(EntityType.INSTANCE);
 
         parentPOMapper.deleteByExample(example);
     }
@@ -64,9 +65,9 @@ public class ParentDAOImpl implements ParentDAO {
         ParentPO po = new ParentPO();
         po.setId(UUID.randomUUID().toString());
         po.setChildId(endpointId);
-        po.setChildType("endpoint");
+        po.setChildType(EntityType.ENDPOINT);
         po.setParentId(instanceId);
-        po.setParentType("instance");
+        po.setParentType(EntityType.INSTANCE);
         po.setStatus(DbStatus.NORMAL);
 
         parentPOMapper.insert(po);
@@ -77,9 +78,9 @@ public class ParentDAOImpl implements ParentDAO {
         ParentPOExample example = new ParentPOExample();
         example.or()
                 .andChildIdEqualTo(nodeId)
-                .andChildTypeEqualTo("node")
+                .andChildTypeEqualTo(EntityType.NODE)
                 .andParentIdEqualTo(instanceId)
-                .andParentTypeEqualTo("instance");
+                .andParentTypeEqualTo(EntityType.INSTANCE);
 
         parentPOMapper.deleteByExample(example);
     }
@@ -89,9 +90,9 @@ public class ParentDAOImpl implements ParentDAO {
         ParentPO po = new ParentPO();
         po.setId(UUID.randomUUID().toString());
         po.setChildId(nodeId);
-        po.setChildType("node");
+        po.setChildType(EntityType.NODE);
         po.setParentId(instanceId);
-        po.setParentType("instance");
+        po.setParentType(EntityType.INSTANCE);
         po.setStatus(DbStatus.NORMAL);
 
         parentPOMapper.insert(po);

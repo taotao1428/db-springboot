@@ -1,12 +1,15 @@
 package com.hewutao.db.model.support;
 
 import com.hewutao.db.model.Delay;
+import com.hewutao.db.model.Entity;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
 
-public class DelayList<E, T> implements Delay<List<T>>, List<T> {
+@Slf4j
+public class DelayList<E extends Entity, T> implements Delay<List<T>>, List<T> {
     private Function<E, List<T>> supplier;
     private E entity;
     private List<T> original;
@@ -32,6 +35,7 @@ public class DelayList<E, T> implements Delay<List<T>>, List<T> {
 
     private void load() {
         if (!loaded()) {
+            log.info("load data of entity [{}:{}]", entity.getClass().getName(), entity.getId());
             this.original = supplier.apply(entity);
             this.current = new ArrayList<>(this.original);
             this.supplier = null;
