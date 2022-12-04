@@ -1,6 +1,6 @@
-package com.hewutao.db.model2.support;
+package com.hewutao.db.model.support;
 
-import com.hewutao.db.model2.Delay;
+import com.hewutao.db.model.Delay;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.hewutao.db.dao.repository;
 
-import com.hewutao.db.model2.Endpoint;
-import com.hewutao.db.model2.Instance;
+import com.hewutao.db.model.Endpoint;
+import com.hewutao.db.model.Instance;
 
 import java.util.List;
 

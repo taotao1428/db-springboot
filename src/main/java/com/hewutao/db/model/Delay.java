@@ -1,4 +1,4 @@
-package com.hewutao.db.model2;
+package com.hewutao.db.model;
 
 public interface Delay<T> {
     boolean loaded();

@@ -1,4 +1,8 @@
-package com.hewutao.db.model;
+package com.hewutao.db.model3;
+
+import com.hewutao.db.model.EndpointPurpose;
+import com.hewutao.db.model.EntityStatus;
+import com.hewutao.db.model.InstanceMode;
 
 import java.util.ArrayList;
 import java.util.List;

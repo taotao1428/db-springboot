@@ -1,4 +1,4 @@
-package com.hewutao.db.model;
+package com.hewutao.db.model3;
 
 public abstract class BaseEntity implements Entity {
     protected String id;

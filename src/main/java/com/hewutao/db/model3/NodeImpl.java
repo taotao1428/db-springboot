@@ -1,4 +1,6 @@
-package com.hewutao.db.model;
+package com.hewutao.db.model3;
+
+import com.hewutao.db.model.EntityStatus;
 
 public class NodeImpl extends BaseEntity implements Node {
     private final Field<String> nameField;

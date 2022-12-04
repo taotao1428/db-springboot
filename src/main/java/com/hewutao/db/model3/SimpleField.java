@@ -1,4 +1,4 @@
-package com.hewutao.db.model;
+package com.hewutao.db.model3;
 
 import java.util.Objects;
 

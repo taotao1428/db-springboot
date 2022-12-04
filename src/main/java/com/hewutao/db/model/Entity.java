@@ -1,14 +1,50 @@
 package com.hewutao.db.model;
 
-public interface Entity {
-    boolean isExisted();
-    String getId();
-    void delete();
-    void cascadeDelete();
-    boolean isDeleted();
+public abstract class Entity {
+    // 保留原来的值
+    protected Entity original;
+    protected final String id;
+    protected boolean existed = false;
 
-    interface EntityBuilder<T extends Entity, B extends EntityBuilder<T, B>> {
-        B id(String id);
-        T build();
+    protected Entity(String id, boolean existed) {
+        this.id = id;
+        this.existed = existed;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public abstract boolean isDeleted();
+
+    public abstract void delete();
+
+    public void cascadeDelete() {
+        this.delete();
+    }
+
+    protected void saveOriginal() {
+        if (original == null) {
+            original = createOriginal();
+        }
+    }
+
+    public Entity getOriginal() {
+        return this.original;
+    }
+
+    public void deleteOriginal() {
+        this.original = null;
+    }
+
+    public boolean isExisted() {
+        return this.existed;
+    }
+
+    protected abstract Entity createOriginal();
+
+    public void saved() {
+        this.existed = true;
+        this.original = createOriginal();
     }
 }
