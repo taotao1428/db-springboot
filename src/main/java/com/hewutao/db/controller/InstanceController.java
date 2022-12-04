@@ -1,5 +1,6 @@
 package com.hewutao.db.controller;
 
+import com.hewutao.db.controller.vo.ModifyEndpointIpReqVO;
 import com.hewutao.db.controller.vo.ModifyInstanceModeReqVO;
 import com.hewutao.db.service.InstanceService;
 import com.hewutao.db.service.dto.*;
@@ -43,5 +44,15 @@ public class InstanceController {
                 .build();
 
         return instanceService.modifyInstanceMode(req);
+    }
+
+    @PutMapping("/instances/{instanceId}/actions/modify_ip")
+    public ModifyEndpointIpResp modifyIp(@PathVariable String instanceId, @RequestBody ModifyEndpointIpReqVO reqVO) {
+        ModifyEndpointIpReq req = ModifyEndpointIpReq.builder()
+                .instanceId(instanceId)
+                .ip(reqVO.getIp())
+                .build();
+
+        return instanceService.modifyEndpointIp(req);
     }
 }

@@ -13,6 +13,8 @@ import com.hewutao.db.service.dto.CreateInstanceReq;
 import com.hewutao.db.service.dto.CreateInstanceResp;
 import com.hewutao.db.service.dto.EndpointDTO;
 import com.hewutao.db.service.dto.InstanceDTO;
+import com.hewutao.db.service.dto.ModifyEndpointIpReq;
+import com.hewutao.db.service.dto.ModifyEndpointIpResp;
 import com.hewutao.db.service.dto.ModifyInstanceModeReq;
 import com.hewutao.db.service.dto.ModifyInstanceModeResp;
 import com.hewutao.db.service.dto.NodeDTO;
@@ -215,5 +217,31 @@ public class InstanceServiceImpl implements InstanceService {
 
         nodes.get(1).delete();
         instance.setMode(InstanceMode.SINGLE);
+    }
+
+    @Override
+    public ModifyEndpointIpResp modifyEndpointIp(ModifyEndpointIpReq req) {
+        Instance instance = instanceRepository.getById(req.getInstanceId());
+        if (instance == null) {
+            throw new IllegalArgumentException("instance [" + req.getInstanceId() + "] is not existed");
+        }
+
+        Endpoint dataEndpoint = instance.getDataEndpoint();
+        if (!dataEndpoint.getIp().equals(req.getIp())) {
+            dataEndpoint.delete();
+            Endpoint newDataEndpoint = new Endpoint(
+                    UUID.randomUUID().toString(),
+                    req.getIp(),
+                    UUID.randomUUID().toString(),
+                    EndpointPurpose.DATA,
+                    EntityStatus.NORMAL,
+                    instance
+            );
+            instance.addEndpoint(newDataEndpoint);
+
+            instanceRepository.saveInstance(instance);
+        }
+
+        return ModifyEndpointIpResp.builder().instance(convertInstance(instance)).build();
     }
 }
