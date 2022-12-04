@@ -4,7 +4,7 @@ import com.hewutao.db.dao.base.dao.InstanceDAO;
 import com.hewutao.db.dao.base.mapper.InstancePOMapper;
 import com.hewutao.db.dao.base.model.InstancePO;
 import com.hewutao.db.dao.base.model.InstancePOExample;
-import com.hewutao.db.model.EntityStatus;
+import com.hewutao.db.dao.base.support.DbStatus;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ public class InstanceDAOImpl implements InstanceDAO {
         InstancePOExample example = new InstancePOExample();
         example.or()
                 .andIdEqualTo(id)
-                .andStatusNotEqualTo(EntityStatus.DELETED.name());
+                .andStatusNotEqualTo(DbStatus.DELETED);
 
         List<InstancePO> instancePOS = instancePOMapper.selectByExample(example);
 
@@ -57,7 +57,7 @@ public class InstanceDAOImpl implements InstanceDAO {
         }
 
         // 不要查询出已经删除的实例
-        criteria.andStatusNotEqualTo("deleted");
+        criteria.andStatusNotEqualTo(DbStatus.DELETED);
 
         return instancePOMapper.selectByExample(example);
     }

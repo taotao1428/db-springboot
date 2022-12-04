@@ -4,6 +4,7 @@ import com.hewutao.db.dao.base.dao.EndpointDAO;
 import com.hewutao.db.dao.base.mapper.EndpointPOMapper;
 import com.hewutao.db.dao.base.model.EndpointPO;
 import com.hewutao.db.dao.base.model.EndpointPOExample;
+import com.hewutao.db.dao.base.support.DbStatus;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +20,7 @@ public class EndpointDAOImpl implements EndpointDAO {
         EndpointPOExample example = new EndpointPOExample();
         example.or()
                 .andIdIn(endpointIds)
-                .andStatusNotEqualTo("deleted");
+                .andStatusNotEqualTo(DbStatus.DELETED);
 
 
         return endpointPOMapper.selectByExample(example);

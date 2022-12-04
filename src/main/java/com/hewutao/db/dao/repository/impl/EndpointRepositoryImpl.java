@@ -103,7 +103,7 @@ public class EndpointRepositoryImpl implements EndpointRepository {
         po.setIp(endpoint.getIp());
         po.setIaasId(endpoint.getIaasId());
         po.setPurpose(endpoint.getPurpose().name());
-        po.setStatus(endpoint.getStatus().name());
+        po.setStatus(endpoint.getStatus().getDbStatus());
 
         return po;
     }

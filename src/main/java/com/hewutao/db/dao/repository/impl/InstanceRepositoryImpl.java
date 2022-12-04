@@ -138,7 +138,7 @@ public class InstanceRepositoryImpl implements InstanceRepository {
         po.setName(instance.getName());
         po.setMode(instance.getMode().name());
         po.setEngineId(instance.getEngineId());
-        po.setStatus(instance.getStatus().name());
+        po.setStatus(instance.getStatus().getDbStatus());
 
         return po;
     }

@@ -99,6 +99,9 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     private static InstanceDTO convertInstance(Instance instance) {
+        if (instance == null) {
+            return null;
+        }
         return InstanceDTO.builder()
                 .id(instance.getId())
                 .name(instance.getId())

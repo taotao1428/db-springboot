@@ -4,6 +4,7 @@ import com.hewutao.db.dao.base.dao.ParentDAO;
 import com.hewutao.db.dao.base.mapper.ParentPOMapper;
 import com.hewutao.db.dao.base.model.ParentPO;
 import com.hewutao.db.dao.base.model.ParentPOExample;
+import com.hewutao.db.dao.base.support.DbStatus;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +23,7 @@ public class ParentDAOImpl implements ParentDAO {
         example.or().andParentIdEqualTo(instanceId)
                 .andParentTypeEqualTo("instance")
                 .andChildTypeEqualTo("endpoint")
-                .andStatusEqualTo("normal");
+                .andStatusEqualTo(DbStatus.NORMAL);
 
         List<ParentPO> parentPOS = parentPOMapper.selectByExample(example);
 
@@ -37,7 +38,7 @@ public class ParentDAOImpl implements ParentDAO {
         example.or().andParentIdEqualTo(instanceId)
                 .andParentTypeEqualTo("instance")
                 .andChildTypeEqualTo("node")
-                .andStatusEqualTo("normal");
+                .andStatusEqualTo(DbStatus.NORMAL);
 
         List<ParentPO> parentPOS = parentPOMapper.selectByExample(example);
 
@@ -66,7 +67,7 @@ public class ParentDAOImpl implements ParentDAO {
         po.setChildType("endpoint");
         po.setParentId(instanceId);
         po.setParentType("instance");
-        po.setStatus("normal");
+        po.setStatus(DbStatus.NORMAL);
 
         parentPOMapper.insert(po);
     }
@@ -91,7 +92,7 @@ public class ParentDAOImpl implements ParentDAO {
         po.setChildType("node");
         po.setParentId(instanceId);
         po.setParentType("instance");
-        po.setStatus("normal");
+        po.setStatus(DbStatus.NORMAL);
 
         parentPOMapper.insert(po);
     }

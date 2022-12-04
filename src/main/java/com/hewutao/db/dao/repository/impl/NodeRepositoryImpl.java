@@ -96,7 +96,7 @@ public class NodeRepositoryImpl implements NodeRepository {
         NodePO po = new NodePO();
         po.setId(node.getId());
         po.setName(node.getName());
-        po.setStatus(node.getStatus().name());
+        po.setStatus(node.getStatus().getDbStatus());
 
         return po;
     }
