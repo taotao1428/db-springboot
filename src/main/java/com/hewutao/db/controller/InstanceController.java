@@ -1,5 +1,6 @@
 package com.hewutao.db.controller;
 
+import com.hewutao.db.controller.vo.ModifyInstanceModeReqVO;
 import com.hewutao.db.service.InstanceService;
 import com.hewutao.db.service.dto.*;
 import lombok.AllArgsConstructor;
@@ -32,5 +33,15 @@ public class InstanceController {
                 .build();
 
         return instanceService.queryInstanceList(req);
+    }
+
+    @PutMapping("/instances/{instanceId}/actions/modify_mode")
+    public ModifyInstanceModeResp modifyMode(@PathVariable String instanceId, @RequestBody ModifyInstanceModeReqVO reqVO) {
+        ModifyInstanceModeReq req = ModifyInstanceModeReq.builder()
+                .instanceId(instanceId)
+                .mode(reqVO.getMode())
+                .build();
+
+        return instanceService.modifyInstanceMode(req);
     }
 }

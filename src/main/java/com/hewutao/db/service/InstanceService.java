@@ -6,4 +6,5 @@ public interface InstanceService {
     CreateInstanceResp createInstance(CreateInstanceReq req);
     QueryInstanceResp queryInstance(QueryInstanceReq req);
     QueryInstanceListResp queryInstanceList(QueryInstanceListReq req);
+    ModifyInstanceModeResp modifyInstanceMode(ModifyInstanceModeReq req);
 }

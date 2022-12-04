@@ -13,6 +13,8 @@ import com.hewutao.db.service.dto.CreateInstanceReq;
 import com.hewutao.db.service.dto.CreateInstanceResp;
 import com.hewutao.db.service.dto.EndpointDTO;
 import com.hewutao.db.service.dto.InstanceDTO;
+import com.hewutao.db.service.dto.ModifyInstanceModeReq;
+import com.hewutao.db.service.dto.ModifyInstanceModeResp;
 import com.hewutao.db.service.dto.NodeDTO;
 import com.hewutao.db.service.dto.QueryInstanceListReq;
 import com.hewutao.db.service.dto.QueryInstanceListResp;
@@ -163,5 +165,55 @@ public class InstanceServiceImpl implements InstanceService {
         return QueryInstanceListResp.builder()
                 .instances(instanceDTOS)
                 .build();
+    }
+
+    @Override
+    public ModifyInstanceModeResp modifyInstanceMode(ModifyInstanceModeReq req) {
+        Instance instance = instanceRepository.getById(req.getInstanceId());
+        if (instance == null) {
+            throw new IllegalArgumentException("instance [" + req.getInstanceId() + "] is not existed");
+        }
+
+        InstanceMode targetMode = InstanceMode.from(req.getMode());
+
+        if (instance.getMode() != targetMode) {
+            if (instance.getMode() == InstanceMode.SINGLE && targetMode == InstanceMode.HA) {
+                modifySingleToHa(instance);
+            } else if (instance.getMode() == InstanceMode.HA && targetMode == InstanceMode.SINGLE) {
+                modifyHaToSingle(instance);
+            } else {
+                throw new IllegalArgumentException("unSupport modify mode [" + instance.getMode().name() + "] to mode [" + targetMode.name() + "]");
+            }
+
+            instanceRepository.saveInstance(instance);
+        }
+        return ModifyInstanceModeResp.builder().instance(convertInstance(instance)).build();
+    }
+
+    private void modifySingleToHa(Instance instance) {
+        List<Node> nodes = instance.getNodes();
+        if (nodes.size() != 1) {
+            throw new IllegalStateException("there are " + nodes.size() + " node in single instance, expect 1 node");
+        }
+
+        Node slaveNode = new Node(
+                UUID.randomUUID().toString(),
+                instance.getName() + "_node2",
+                EntityStatus.NORMAL,
+                instance
+        );
+
+        instance.addNode(slaveNode);
+        instance.setMode(InstanceMode.HA);
+    }
+
+    private void modifyHaToSingle(Instance instance) {
+        List<Node> nodes = instance.getNodes();
+        if (nodes.size() != 2) {
+            throw new IllegalStateException("there are " + nodes.size() + " node in ha instance, expect 2 node");
+        }
+
+        nodes.get(1).delete();
+        instance.setMode(InstanceMode.SINGLE);
     }
 }
