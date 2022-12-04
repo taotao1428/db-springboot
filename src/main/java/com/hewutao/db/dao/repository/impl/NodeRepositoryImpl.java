@@ -7,7 +7,10 @@ import com.hewutao.db.dao.repository.NodeRepository;
 import com.hewutao.db.model.EntityStatus;
 import com.hewutao.db.model.Instance;
 import com.hewutao.db.model.Node;
+import com.hewutao.db.model.support.SaveEntityEvent;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +18,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Repository
 @AllArgsConstructor
 public class NodeRepositoryImpl implements NodeRepository {
+    private ApplicationEventPublisher publisher;
     private ParentDAO parentDAO;
     private NodeDAO nodeDAO;
 
@@ -32,7 +37,7 @@ public class NodeRepositoryImpl implements NodeRepository {
                         po.getName(),
                         EntityStatus.from(po.getStatus()),
                         instance,
-                        true
+                        po
                 ))
                 .collect(Collectors.toList());
     }
@@ -40,6 +45,11 @@ public class NodeRepositoryImpl implements NodeRepository {
     @Transactional
     @Override
     public void saveNode(Node node) {
+        if (node.isDeleted() && !node.isExisted()) {
+            log.info("node [{}] is deleted and is not existed, dont need save", node.getId());
+            return;
+        }
+
         Instance instance = node.getInstance();
         if (node.isDeleted()) {
             if (node.isExisted()) {
@@ -56,19 +66,30 @@ public class NodeRepositoryImpl implements NodeRepository {
         }
     }
 
-    public void updateNode(Node node) {
-        Node original = node.getOriginal();
+    private void publishEventForRollback(Node node, NodePO current) {
+        node.innerPrepareForSave(current);
+        log.info("node [{}] is updated or added, publish event", node.getId());
+        publisher.publishEvent(new SaveEntityEvent(node));
+    }
 
-        if (original == null || (Objects.equals(node.getName(), original.getName())
-                && Objects.equals(node.getStatus(), original.getStatus()))) {
+    public void updateNode(Node node) {
+        NodePO original = (NodePO) node.innerGetOriginal();
+        NodePO current = convertToPo(node);
+
+        if (Objects.equals(current.getName(), original.getName())
+                && Objects.equals(current.getStatus(), original.getStatus())) {
             return;
         }
 
-        nodeDAO.update(convertToPo(node));
+        nodeDAO.update(current);
+
+        publishEventForRollback(node, current);
     }
 
     public void addNode(Node node) {
-        nodeDAO.add(convertToPo(node));
+        NodePO current = convertToPo(node);
+        nodeDAO.add(current);
+        publishEventForRollback(node, current);
     }
 
     private NodePO convertToPo(Node node) {

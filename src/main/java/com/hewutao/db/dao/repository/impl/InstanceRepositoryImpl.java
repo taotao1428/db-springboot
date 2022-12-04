@@ -13,7 +13,10 @@ import com.hewutao.db.model.Entity;
 import com.hewutao.db.model.Instance;
 import com.hewutao.db.model.Node;
 import com.hewutao.db.model.support.DelayList;
+import com.hewutao.db.model.support.SaveEntityEvent;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +24,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Repository
 @AllArgsConstructor
 public class InstanceRepositoryImpl implements InstanceRepository {
-
+    private ApplicationEventPublisher publisher;
     private InstanceDAO instanceDAO;
     private EndpointRepository endpointRepository;
     private NodeRepository nodeRepository;
@@ -51,7 +55,7 @@ public class InstanceRepositoryImpl implements InstanceRepository {
                 EntityStatus.from(instancePO.getStatus()),
                 delayEndpointList,
                 delayNodeList,
-                true
+                instancePO
         );
 
         delayEndpointList.setEntity(instance);
@@ -62,12 +66,16 @@ public class InstanceRepositoryImpl implements InstanceRepository {
     @Transactional
     @Override
     public void saveInstance(Instance instance) {
+        if (instance.isDeleted() && !instance.isExisted()) {
+            log.info("instance [{}] is deleted and is not existed, dont need save", instance.getId());
+            return;
+        }
+
+        saveCascadeEntity(instance);
+
         if (instance.isDeleted()) {
             if (instance.isExisted()) {
                 updateInstance(instance);
-            } else {
-                // 实例没有保存过，并且也被删除了，因此不需要保存
-                return;
             }
         } else {
             if (instance.isExisted()) {
@@ -76,7 +84,9 @@ public class InstanceRepositoryImpl implements InstanceRepository {
                 addInstance(instance);
             }
         }
+    }
 
+    private void saveCascadeEntity(Instance instance) {
         List<Endpoint> endpoints = instance.innerGetEndpoints();
 
         if (hasLoaded(endpoints)) {
@@ -90,23 +100,36 @@ public class InstanceRepositoryImpl implements InstanceRepository {
         }
     }
 
+    private void publishEventForRollback(Instance instance, InstancePO current) {
+        // 发布保存实例的事件，方便回滚
+        instance.innerPrepareForSave(current);
+        log.info("instance [{}] is updated or added, publish event", instance.getId());
+        publisher.publishEvent(new SaveEntityEvent(instance));
+    }
+
     private boolean hasLoaded(List<? extends Entity> entityList) {
         return !(entityList instanceof DelayList) || ((DelayList<?, ?>) entityList).loaded();
     }
 
     private void updateInstance(Instance instance) {
-        Instance original = instance.getOriginal();
+        InstancePO original = (InstancePO) instance.innerGetOriginal();
+        InstancePO current = convertToPo(instance);
         // 没有变化
-        if (original == null || (Objects.equals(instance.getName(), original.getName())
-            && Objects.equals(instance.getMode(), original.getMode())
-            && Objects.equals(instance.getStatus(), original.getStatus()))) {
+        if (Objects.equals(current.getName(), original.getName())
+                && Objects.equals(current.getMode(), original.getMode())
+                && Objects.equals(current.getEngineId(), original.getEngineId())
+                && Objects.equals(current.getStatus(), original.getStatus())) {
             return;
         }
-        instanceDAO.update(convertToPo(instance));
+        instanceDAO.update(current);
+
+        publishEventForRollback(instance, current);
     }
 
     private void addInstance(Instance instance) {
-        instanceDAO.add(convertToPo(instance));
+        InstancePO current = convertToPo(instance);
+        instanceDAO.add(current);
+        publishEventForRollback(instance, current);
     }
 
     private InstancePO convertToPo(Instance instance) {

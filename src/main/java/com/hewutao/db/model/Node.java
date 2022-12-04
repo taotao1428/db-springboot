@@ -1,23 +1,21 @@
 package com.hewutao.db.model;
 
+import com.hewutao.db.dao.base.model.NodePO;
+
 public class Node extends Entity {
     private String name;
     private EntityStatus status;
     private final Instance instance;
 
     public Node(String id, String name, EntityStatus status, Instance instance) {
-        this(id, name, status, instance, false);
+        this(id, name, status, instance, null);
     }
 
-    public Node(String id, String name, EntityStatus status, Instance instance, boolean existed) {
-        super(id, existed);
+    public Node(String id, String name, EntityStatus status, Instance instance, NodePO original) {
+        super(id, original);
         this.name = name;
         this.status = status;
         this.instance = instance;
-
-        if (existed) {
-            saveOriginal();
-        }
     }
 
 
@@ -43,11 +41,6 @@ public class Node extends Entity {
 
 
     @Override
-    public Node getOriginal() {
-        return (Node) super.getOriginal();
-    }
-
-    @Override
     public boolean isDeleted() {
         return this.status == EntityStatus.DELETED;
     }
@@ -57,8 +50,4 @@ public class Node extends Entity {
         this.status = EntityStatus.DELETED;
     }
 
-    @Override
-    protected Entity createOriginal() {
-        return new Node(id, name, status, instance, existed);
-    }
 }

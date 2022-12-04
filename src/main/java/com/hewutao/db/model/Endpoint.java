@@ -1,5 +1,7 @@
 package com.hewutao.db.model;
 
+import com.hewutao.db.dao.base.model.EndpointPO;
+
 public class Endpoint extends Entity {
     private String ip;
     private String iaasId;
@@ -8,20 +10,16 @@ public class Endpoint extends Entity {
     private EntityStatus status;
 
     public Endpoint(String id, String ip, String iaasId, EndpointPurpose purpose, EntityStatus status, Instance instance) {
-        this(id, ip, iaasId, purpose, status, instance, false);
+        this(id, ip, iaasId, purpose, status, instance, null);
     }
 
-    public Endpoint(String id, String ip, String iaasId, EndpointPurpose purpose, EntityStatus status, Instance instance, boolean existed) {
-        super(id, existed);
+    public Endpoint(String id, String ip, String iaasId, EndpointPurpose purpose, EntityStatus status, Instance instance, EndpointPO original) {
+        super(id, original);
         this.ip = ip;
         this.iaasId = iaasId;
         this.purpose = purpose;
         this.status = status;
         this.instance = instance;
-
-        if (existed) {
-            saveOriginal();
-        }
     }
 
     public String getIp() {
@@ -48,12 +46,6 @@ public class Endpoint extends Entity {
         this.status = status;
     }
 
-
-    @Override
-    public Endpoint getOriginal() {
-        return (Endpoint) super.getOriginal();
-    }
-
     @Override
     public boolean isDeleted() {
         return this.status == EntityStatus.DELETED;
@@ -62,10 +54,5 @@ public class Endpoint extends Entity {
     @Override
     public void delete() {
         this.status = EntityStatus.DELETED;
-    }
-
-    @Override
-    protected Endpoint createOriginal() {
-        return new Endpoint(id, ip, iaasId, purpose, status, instance, existed);
     }
 }

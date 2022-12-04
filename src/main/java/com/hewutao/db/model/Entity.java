@@ -1,14 +1,14 @@
 package com.hewutao.db.model;
 
-public abstract class Entity {
-    // 保留原来的值
-    protected Entity original;
+public abstract class Entity  {
+    // 保留原来的值, 方便回滚
+    protected Object oldOriginal;
+    protected Object original;
     protected final String id;
-    protected boolean existed = false;
 
-    protected Entity(String id, boolean existed) {
+    protected Entity(String id, Object original) {
         this.id = id;
-        this.existed = existed;
+        this.original = original;
     }
 
     public String getId() {
@@ -23,28 +23,22 @@ public abstract class Entity {
         this.delete();
     }
 
-    protected void saveOriginal() {
-        if (original == null) {
-            original = createOriginal();
-        }
-    }
-
-    public Entity getOriginal() {
+    public Object innerGetOriginal() {
         return this.original;
     }
 
-    public void deleteOriginal() {
-        this.original = null;
+
+    public void innerPrepareForSave(Object original) {
+        this.oldOriginal = this.original;
+        this.original = original;
+    }
+
+    public void innerRollback() {
+        this.original = this.oldOriginal;
+        this.oldOriginal = null;
     }
 
     public boolean isExisted() {
-        return this.existed;
-    }
-
-    protected abstract Entity createOriginal();
-
-    public void saved() {
-        this.existed = true;
-        this.original = createOriginal();
+        return this.original != null;
     }
 }

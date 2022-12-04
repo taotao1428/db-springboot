@@ -8,7 +8,10 @@ import com.hewutao.db.model.EndpointPurpose;
 import com.hewutao.db.model.EntityStatus;
 import com.hewutao.db.model.Endpoint;
 import com.hewutao.db.model.Instance;
+import com.hewutao.db.model.support.SaveEntityEvent;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,9 +19,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Repository
 @AllArgsConstructor
 public class EndpointRepositoryImpl implements EndpointRepository {
+    private ApplicationEventPublisher publisher;
     private ParentDAO parentDAO;
     private EndpointDAO endpointDAO;
 
@@ -34,7 +39,7 @@ public class EndpointRepositoryImpl implements EndpointRepository {
                         EndpointPurpose.from(po.getPurpose()),
                         EntityStatus.from(po.getStatus()),
                         instance,
-                        true
+                        po
                 ))
                 .collect(Collectors.toList());
     }
@@ -42,6 +47,11 @@ public class EndpointRepositoryImpl implements EndpointRepository {
     @Transactional
     @Override
     public void saveEndpoint(Endpoint endpoint) {
+        if (endpoint.isDeleted() && !endpoint.isExisted()) {
+            log.debug("endpoint [{}] is deleted and is not existed, dont need save", endpoint.getId());
+            return;
+        }
+
         Instance instance = endpoint.getInstance();
         if (endpoint.isDeleted()) {
             if (endpoint.isExisted()) {
@@ -58,23 +68,32 @@ public class EndpointRepositoryImpl implements EndpointRepository {
         }
     }
 
-    private void updateEndpoint(Endpoint endpoint) {
-        Endpoint original = endpoint.getOriginal();
+    private void publishEventForRollback(Endpoint endpoint, EndpointPO current) {
+        // 发送事件，方便回滚
+        endpoint.innerPrepareForSave(current);
+        log.info("endpoint [{}] is updated or added, publish event", endpoint.getId());
+        publisher.publishEvent(new SaveEntityEvent(endpoint));
+    }
 
+    private void updateEndpoint(Endpoint endpoint) {
+        EndpointPO original = (EndpointPO) endpoint.innerGetOriginal();
+        EndpointPO current = convertToPO(endpoint);
         // 没有改变
-        if (original == null || (Objects.equals(endpoint.getIp(), original.getIp())
-                && Objects.equals(endpoint.getIaasId(), original.getIaasId())
-                && Objects.equals(endpoint.getPurpose(), original.getPurpose())
-                && Objects.equals(endpoint.getStatus(), original.getStatus()))) {
+        if (Objects.equals(current.getIp(), original.getIp())
+                && Objects.equals(current.getIaasId(), original.getIaasId())
+                && Objects.equals(current.getPurpose(), original.getPurpose())
+                && Objects.equals(current.getStatus(), original.getStatus())) {
             return;
         }
 
-        endpointDAO.update(convertToPO(endpoint));
+        endpointDAO.update(current);
+        publishEventForRollback(endpoint, current);
     }
 
     private void addEndpoint(Endpoint endpoint) {
-
-        endpointDAO.add(convertToPO(endpoint));
+        EndpointPO current = convertToPO(endpoint);
+        endpointDAO.add(current);
+        publishEventForRollback(endpoint, current);
     }
 
 
@@ -87,7 +106,6 @@ public class EndpointRepositoryImpl implements EndpointRepository {
         po.setStatus(endpoint.getStatus().name());
 
         return po;
-
     }
 
 

@@ -1,6 +1,6 @@
 package com.hewutao.db.model;
 
-import com.hewutao.db.model.support.EntityUtils;
+import com.hewutao.db.dao.base.model.InstancePO;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,21 +16,25 @@ public class Instance extends Entity {
     private final List<Node> nodes;
 
     public Instance(String id, String name, String engineId, InstanceMode mode, EntityStatus status) {
-        this(id, name, engineId, mode, status, new ArrayList<>(), new ArrayList<>(), false);
+        this(id, name, engineId, mode, status, new ArrayList<>(), new ArrayList<>(), null);
     }
-    public Instance(String id, String name, String engineId, InstanceMode mode, EntityStatus status, List<Endpoint> endpoints, List<Node> nodes, boolean existed) {
-        super(id, existed);
+
+    public Instance(String id, String name, String engineId, InstanceMode mode, EntityStatus status, List<Endpoint> endpoints, List<Node> nodes) {
+        this(id, name, engineId, mode, status, endpoints, nodes, null);
+    }
+
+    public Instance(String id, String name, String engineId, InstanceMode mode, EntityStatus status, List<Endpoint> endpoints, List<Node> nodes, InstancePO original) {
+        super(id, original);
         this.name = name;
         this.engineId = engineId;
         this.mode = mode;
         this.status = status;
         this.endpoints = endpoints;
         this.nodes = nodes;
-
-        if (existed) {
-            saveOriginal();
-        }
     }
+
+
+
 
     public String getName() {
         return this.name;
@@ -151,16 +155,5 @@ public class Instance extends Entity {
         for (Endpoint ep : endpoints) {
             ep.cascadeDelete();
         }
-    }
-
-    @Override
-    public Instance getOriginal() {
-        return (Instance) super.getOriginal();
-    }
-
-    @Override
-    protected Instance createOriginal() {
-        return new Instance(id, name, engineId, mode, status,
-                EntityUtils.getData(endpoints), EntityUtils.getData(nodes), existed);
     }
 }
