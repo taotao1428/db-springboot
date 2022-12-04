@@ -11,7 +11,9 @@ import com.hewutao.db.model.Node;
 import com.hewutao.db.service.InstanceService;
 import com.hewutao.db.service.dto.CreateInstanceReq;
 import com.hewutao.db.service.dto.CreateInstanceResp;
+import com.hewutao.db.service.dto.EndpointDTO;
 import com.hewutao.db.service.dto.InstanceDTO;
+import com.hewutao.db.service.dto.NodeDTO;
 import com.hewutao.db.service.dto.QueryInstanceListReq;
 import com.hewutao.db.service.dto.QueryInstanceListResp;
 import com.hewutao.db.service.dto.QueryInstanceReq;
@@ -107,8 +109,34 @@ public class InstanceServiceImpl implements InstanceService {
                 .name(instance.getId())
                 .mode(instance.getMode().name())
                 .enginId(instance.getEngineId())
+                .status(instance.getStatus().getDbStatus())
+                .endpoint(convertEndpoint(instance.getDataEndpoint()))
+                .nodes(instance.getNodes().stream().map(node -> convertNode(node)).collect(Collectors.toList()))
                 .build();
     }
+
+    private static NodeDTO convertNode(Node node) {
+        if (node == null) {
+            return null;
+        }
+
+        return NodeDTO.builder()
+                .id(node.getId())
+                .name(node.getName())
+                .status(node.getStatus().getDbStatus())
+                .build();
+    }
+
+    private static EndpointDTO convertEndpoint(Endpoint endpoint) {
+        if (endpoint == null) {
+            return null;
+        }
+
+        return EndpointDTO.builder()
+                .ip(endpoint.getIp())
+                .build();
+    }
+
 
     @Override
     public QueryInstanceResp queryInstance(QueryInstanceReq req) {

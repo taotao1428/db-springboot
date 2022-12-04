@@ -105,7 +105,11 @@ public class Instance extends Entity {
     }
 
     public List<Node> getNodes() {
-        return Collections.unmodifiableList(nodes);
+        List<Node> undeletedNodes = nodes.stream()
+                .filter(node -> !node.isDeleted())
+                .collect(Collectors.toList());
+
+        return Collections.unmodifiableList(undeletedNodes);
     }
 
     public List<Node> innerGetNodes() {
