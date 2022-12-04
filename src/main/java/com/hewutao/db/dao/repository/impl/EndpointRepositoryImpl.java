@@ -69,15 +69,12 @@ public class EndpointRepositoryImpl implements EndpointRepository {
             return;
         }
 
-        EndpointPO endpointPO = convertToPO(endpoint);
-
-        endpointDAO.update(endpointPO);
+        endpointDAO.update(convertToPO(endpoint));
     }
 
     private void addEndpoint(Endpoint endpoint) {
-        EndpointPO endpointPO = convertToPO(endpoint);
 
-        endpointDAO.update(endpointPO);
+        endpointDAO.add(convertToPO(endpoint));
     }
 
 

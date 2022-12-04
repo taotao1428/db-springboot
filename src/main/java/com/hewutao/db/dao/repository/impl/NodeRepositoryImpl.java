@@ -64,11 +64,11 @@ public class NodeRepositoryImpl implements NodeRepository {
             return;
         }
 
-        nodeDAO.add(convertToPo(node));
+        nodeDAO.update(convertToPo(node));
     }
 
     public void addNode(Node node) {
-        nodeDAO.update(convertToPo(node));
+        nodeDAO.add(convertToPo(node));
     }
 
     private NodePO convertToPo(Node node) {

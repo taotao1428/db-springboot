@@ -62,8 +62,20 @@ public class InstanceRepositoryImpl implements InstanceRepository {
     @Transactional
     @Override
     public void saveInstance(Instance instance) {
-        Instance original = instance.getOriginal();
-        saveInstance(instance, original);
+        if (instance.isDeleted()) {
+            if (instance.isExisted()) {
+                updateInstance(instance);
+            } else {
+                // 实例没有保存过，并且也被删除了，因此不需要保存
+                return;
+            }
+        } else {
+            if (instance.isExisted()) {
+                updateInstance(instance);
+            } else {
+                addInstance(instance);
+            }
+        }
 
         List<Endpoint> endpoints = instance.innerGetEndpoints();
 
@@ -82,25 +94,30 @@ public class InstanceRepositoryImpl implements InstanceRepository {
         return !(entityList instanceof DelayList) || ((DelayList<?, ?>) entityList).loaded();
     }
 
-    private void saveInstance(Instance instance, Instance original) {
+    private void updateInstance(Instance instance) {
+        Instance original = instance.getOriginal();
         // 没有变化
         if (original == null || (Objects.equals(instance.getName(), original.getName())
             && Objects.equals(instance.getMode(), original.getMode())
             && Objects.equals(instance.getStatus(), original.getStatus()))) {
             return;
         }
+        instanceDAO.update(convertToPo(instance));
+    }
 
-        InstancePO instancePO = new InstancePO();
-        instancePO.setId(instance.getId());
-        instancePO.setName(instance.getName());
-        instancePO.setMode(instance.getMode().name());
-        instancePO.setStatus(instance.getStatus().name());
+    private void addInstance(Instance instance) {
+        instanceDAO.add(convertToPo(instance));
+    }
 
-        if (instance.isExisted()) {
-            instanceDAO.add(instancePO);
-        } else {
-            instanceDAO.update(instancePO);
-        }
+    private InstancePO convertToPo(Instance instance) {
+        InstancePO po = new InstancePO();
+        po.setId(instance.getId());
+        po.setName(instance.getName());
+        po.setMode(instance.getMode().name());
+        po.setEngineId(instance.getEngineId());
+        po.setStatus(instance.getStatus().name());
+
+        return po;
     }
 
     @Override
