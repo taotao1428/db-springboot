@@ -59,8 +59,8 @@ public class NodeRepositoryImpl implements NodeRepository {
     public void updateNode(Node node) {
         Node original = node.getOriginal();
 
-        if (Objects.equals(node.getName(), original.getName())
-                && Objects.equals(node.getStatus(), original.getStatus())) {
+        if (original == null || (Objects.equals(node.getName(), original.getName())
+                && Objects.equals(node.getStatus(), original.getStatus()))) {
             return;
         }
 

@@ -62,10 +62,10 @@ public class EndpointRepositoryImpl implements EndpointRepository {
         Endpoint original = endpoint.getOriginal();
 
         // 没有改变
-        if (Objects.equals(endpoint.getIp(), original.getIp())
+        if (original == null || (Objects.equals(endpoint.getIp(), original.getIp())
                 && Objects.equals(endpoint.getIaasId(), original.getIaasId())
                 && Objects.equals(endpoint.getPurpose(), original.getPurpose())
-                && Objects.equals(endpoint.getStatus(), original.getStatus())) {
+                && Objects.equals(endpoint.getStatus(), original.getStatus()))) {
             return;
         }
 

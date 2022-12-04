@@ -84,9 +84,9 @@ public class InstanceRepositoryImpl implements InstanceRepository {
 
     private void saveInstance(Instance instance, Instance original) {
         // 没有变化
-        if (Objects.equals(instance.getName(), original.getName())
+        if (original == null || (Objects.equals(instance.getName(), original.getName())
             && Objects.equals(instance.getMode(), original.getMode())
-            && Objects.equals(instance.getStatus(), original.getStatus())) {
+            && Objects.equals(instance.getStatus(), original.getStatus()))) {
             return;
         }
 
