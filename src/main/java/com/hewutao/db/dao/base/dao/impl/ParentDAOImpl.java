@@ -57,7 +57,10 @@ public class ParentDAOImpl implements ParentDAO {
                 .andParentIdEqualTo(instanceId)
                 .andParentTypeEqualTo(EntityType.INSTANCE);
 
-        parentPOMapper.deleteByExample(example);
+        ParentPO record = new ParentPO();
+        record.setStatus(DbStatus.DELETED);
+
+        parentPOMapper.updateByExampleSelective(record, example);
     }
 
     @Override
@@ -82,7 +85,10 @@ public class ParentDAOImpl implements ParentDAO {
                 .andParentIdEqualTo(instanceId)
                 .andParentTypeEqualTo(EntityType.INSTANCE);
 
-        parentPOMapper.deleteByExample(example);
+        ParentPO record = new ParentPO();
+        record.setStatus(DbStatus.DELETED);
+
+        parentPOMapper.updateByExampleSelective(record, example);
     }
 
     @Override
