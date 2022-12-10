@@ -1,6 +1,7 @@
 package com.hewutao.db.service.impl;
 
 import com.hewutao.db.dao.repository.InstanceRepository;
+import com.hewutao.db.exception.InstanceNotExistedException;
 import com.hewutao.db.model.EndpointPurpose;
 import com.hewutao.db.model.EntityStatus;
 import com.hewutao.db.model.QueryInstanceCondition;
@@ -235,7 +236,7 @@ public class InstanceServiceImpl implements InstanceService {
     public ModifyEndpointIpResp modifyEndpointIp(ModifyEndpointIpReq req) {
         Instance instance = instanceRepository.getById(req.getInstanceId());
         if (instance == null) {
-            throw new IllegalArgumentException("instance [" + req.getInstanceId() + "] is not existed");
+            throw new InstanceNotExistedException(req.getInstanceId());
         }
 
         Endpoint dataEndpoint = instance.getDataEndpoint();
