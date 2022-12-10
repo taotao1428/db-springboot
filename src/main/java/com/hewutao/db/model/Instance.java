@@ -76,7 +76,7 @@ public class Instance extends Entity {
                 .collect(Collectors.toList());
 
         if (dataEndpoints.size() > 1) {
-            throw new IllegalArgumentException("more than one data endpoint");
+            throw new IllegalStateException("more than one data endpoint");
         }
 
         return dataEndpoints.size() == 1 ? dataEndpoints.get(0) : null;
@@ -89,7 +89,7 @@ public class Instance extends Entity {
                 .collect(Collectors.toList());
 
         if (mgntEndpoints.size() > 1) {
-            throw new IllegalArgumentException("more than one management endpoint");
+            throw new IllegalStateException("more than one management endpoint");
         }
 
         return mgntEndpoints.size() == 1 ? mgntEndpoints.get(0) : null;
