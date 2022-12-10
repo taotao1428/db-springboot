@@ -11,6 +11,8 @@ import com.hewutao.db.model.Node;
 import com.hewutao.db.service.InstanceService;
 import com.hewutao.db.service.dto.CreateInstanceReq;
 import com.hewutao.db.service.dto.CreateInstanceResp;
+import com.hewutao.db.service.dto.DeleteInstanceReq;
+import com.hewutao.db.service.dto.DeleteInstanceResp;
 import com.hewutao.db.service.dto.EndpointDTO;
 import com.hewutao.db.service.dto.InstanceDTO;
 import com.hewutao.db.service.dto.ModifyEndpointIpReq;
@@ -115,7 +117,7 @@ public class InstanceServiceImpl implements InstanceService {
                 .enginId(instance.getEngineId())
                 .status(instance.getStatus().getDbStatus())
                 .endpoint(convertEndpoint(instance.getDataEndpoint()))
-                .nodes(instance.getNodes().stream().map(node -> convertNode(node)).collect(Collectors.toList()))
+                .nodes(instance.getNodes().stream().map(InstanceServiceImpl::convertNode).collect(Collectors.toList()))
                 .build();
     }
 
@@ -141,6 +143,16 @@ public class InstanceServiceImpl implements InstanceService {
                 .build();
     }
 
+    @Override
+    public DeleteInstanceResp deleteInstance(DeleteInstanceReq req) {
+        Instance instance = instanceRepository.getById(req.getId());
+        if (instance != null) {
+            instance.cascadeDelete();
+            instanceRepository.saveInstance(instance);
+        }
+
+        return DeleteInstanceResp.builder().id(req.getId()).build();
+    }
 
     @Override
     public QueryInstanceResp queryInstance(QueryInstanceReq req) {
@@ -161,7 +173,7 @@ public class InstanceServiceImpl implements InstanceService {
 
 
         List<InstanceDTO> instanceDTOS = instanceRepository.query(condition).stream()
-                .map(instance -> convertInstance(instance))
+                .map(InstanceServiceImpl::convertInstance)
                 .collect(Collectors.toList());
 
         return QueryInstanceListResp.builder()

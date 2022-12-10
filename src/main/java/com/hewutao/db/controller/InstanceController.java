@@ -3,9 +3,27 @@ package com.hewutao.db.controller;
 import com.hewutao.db.controller.vo.ModifyEndpointIpReqVO;
 import com.hewutao.db.controller.vo.ModifyInstanceModeReqVO;
 import com.hewutao.db.service.InstanceService;
-import com.hewutao.db.service.dto.*;
+import com.hewutao.db.service.dto.CreateInstanceReq;
+import com.hewutao.db.service.dto.CreateInstanceResp;
+import com.hewutao.db.service.dto.DeleteInstanceReq;
+import com.hewutao.db.service.dto.DeleteInstanceResp;
+import com.hewutao.db.service.dto.ModifyEndpointIpReq;
+import com.hewutao.db.service.dto.ModifyEndpointIpResp;
+import com.hewutao.db.service.dto.ModifyInstanceModeReq;
+import com.hewutao.db.service.dto.ModifyInstanceModeResp;
+import com.hewutao.db.service.dto.QueryInstanceListReq;
+import com.hewutao.db.service.dto.QueryInstanceListResp;
+import com.hewutao.db.service.dto.QueryInstanceReq;
+import com.hewutao.db.service.dto.QueryInstanceResp;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
@@ -34,6 +52,15 @@ public class InstanceController {
                 .build();
 
         return instanceService.queryInstanceList(req);
+    }
+
+    @DeleteMapping(value = "/instances/{instanceId}", produces = "application/json")
+    public DeleteInstanceResp delete(@PathVariable String instanceId) {
+        DeleteInstanceReq req = DeleteInstanceReq.builder()
+                .id(instanceId)
+                .build();
+
+        return instanceService.deleteInstance(req);
     }
 
     @PutMapping("/instances/{instanceId}/actions/modify_mode")
